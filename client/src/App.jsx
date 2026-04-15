@@ -3,6 +3,14 @@ import BikeProgressBar from './components/BikeProgressBar';
 import Calendar from './components/Calendar';
 import UserSetup from './components/UserSetup';
 import CITY_LIST from './data/cities';
+import {
+  subscribeUsers,
+  addUser,
+  updateUser,
+  subscribeCommutes,
+  addCommute,
+  deleteCommute,
+} from './services/firestore';
 import './styles/App.css';
 
 /**
@@ -18,48 +26,45 @@ function App() {
   const [editingUser, setEditingUser] = useState(null);
   const [showSettings, setShowSettings] = useState(false);
 
-  // 날씨 지역 설정
+  // 날씨 지역 설정 (개인 설정이라 localStorage 유지)
   const [location, setLocation] = useState(() => {
     const saved = localStorage.getItem('bikeTracker_location');
     return saved ? JSON.parse(saved) : CITY_LIST[0];
   });
 
-  // ── 앱 시작 시 저장된 데이터 불러오기 ──
+  // ── Firestore 실시간 구독 ──
   useEffect(() => {
-    const savedUsers = localStorage.getItem('bikeTracker_users');
-    const savedCurrentUserId = localStorage.getItem('bikeTracker_currentUserId');
-    const savedCommutes = localStorage.getItem('bikeTracker_commutes');
-
-    if (savedUsers) {
-      const parsed = JSON.parse(savedUsers);
-      setUsers(parsed);
-      if (savedCurrentUserId) {
-        const found = parsed.find((u) => u.id === savedCurrentUserId);
+    const unsubUsers = subscribeUsers((data) => {
+      setUsers(data);
+      const savedId = localStorage.getItem('bikeTracker_currentUserId');
+      if (savedId) {
+        const found = data.find((u) => u.id === savedId);
         if (found) setCurrentUser(found);
       }
-    }
-    if (savedCommutes) {
-      setCommutes(JSON.parse(savedCommutes));
-    }
+    });
+
+    const unsubCommutes = subscribeCommutes((data) => {
+      setCommutes(data);
+    });
+
+    return () => {
+      unsubUsers();
+      unsubCommutes();
+    };
   }, []);
 
   // ── 사용자 등록/수정 ──
-  const handleUserRegister = (userData) => {
-    const newUser = { ...userData, id: editingUser?.id || Date.now().toString() };
-
-    setUsers((prev) => {
-      let updated;
-      if (editingUser) {
-        updated = prev.map((u) => (u.id === editingUser.id ? newUser : u));
-      } else {
-        updated = [...prev, newUser];
-      }
-      localStorage.setItem('bikeTracker_users', JSON.stringify(updated));
-      return updated;
-    });
-
-    setCurrentUser(newUser);
-    localStorage.setItem('bikeTracker_currentUserId', newUser.id);
+  const handleUserRegister = async (userData) => {
+    if (editingUser) {
+      await updateUser(editingUser.id, userData);
+      const updated = { ...editingUser, ...userData };
+      setCurrentUser(updated);
+      localStorage.setItem('bikeTracker_currentUserId', editingUser.id);
+    } else {
+      const newUser = await addUser(userData);
+      setCurrentUser(newUser);
+      localStorage.setItem('bikeTracker_currentUserId', newUser.id);
+    }
     setShowModal(false);
     setEditingUser(null);
   };
@@ -86,28 +91,16 @@ function App() {
   };
 
   // ── 출퇴근 토글 ──
-  const handleToggleCommute = (date, type, userId) => {
-    setCommutes((prev) => {
-      const existingIndex = prev.findIndex(
-        (c) => c.userId === userId && c.date === date && c.type === type
-      );
+  const handleToggleCommute = async (date, type, userId) => {
+    const existing = commutes.find(
+      (c) => c.userId === userId && c.date === date && c.type === type
+    );
 
-      let updated;
-      if (existingIndex !== -1) {
-        updated = prev.filter((_, i) => i !== existingIndex);
-      } else {
-        updated = [...prev, {
-          id: Date.now().toString(),
-          userId,
-          date,
-          type,
-          createdAt: new Date().toISOString(),
-        }];
-      }
-
-      localStorage.setItem('bikeTracker_commutes', JSON.stringify(updated));
-      return updated;
-    });
+    if (existing) {
+      await deleteCommute(existing.id);
+    } else {
+      await addCommute({ userId, date, type });
+    }
   };
 
   return (
