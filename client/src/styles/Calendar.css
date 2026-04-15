@@ -39,6 +39,41 @@
   box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
 }
 
+/* ── 색상 범례 ── */
+.calendar-legend {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.75rem;
+  color: #718096;
+  font-weight: 600;
+}
+
+.legend-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+}
+
+.dot-to {
+  background: #48bb78;
+}
+
+.dot-from {
+  background: #ed8936;
+}
+
+.dot-full {
+  background: linear-gradient(135deg, #667eea, #764ba2);
+}
+
 /* ── 요일 헤더 ── */
 .calendar-weekdays {
   display: grid;
@@ -388,6 +423,14 @@
 
   .badge {
     font-size: 0.5rem;
+  }
+
+  .calendar-legend {
+    gap: 8px;
+  }
+
+  .legend-item {
+    font-size: 0.65rem;
   }
 
   .commute-btn {

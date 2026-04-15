@@ -86,20 +86,16 @@ function Calendar({ users, commutes, onToggleCommute, location }) {
       <div className="commute-badges">
         {Object.entries(userMap).map(([userId, status]) => {
           const name = getUserName(userId);
-          // 출퇴 둘 다 → "출퇴:이름", 하나만 → "출:이름" 또는 "퇴:이름"
-          let label, badgeClass;
+          let badgeClass;
           if (status.to && status.from) {
-            label = `출퇴:${name}`;
             badgeClass = 'badge badge-full';
           } else if (status.to) {
-            label = `출:${name}`;
             badgeClass = 'badge badge-to';
           } else {
-            label = `퇴:${name}`;
             badgeClass = 'badge badge-from';
           }
           return (
-            <span key={userId} className={badgeClass} title={label}>{label}</span>
+            <span key={userId} className={badgeClass} title={name}>{name}</span>
           );
         })}
       </div>
@@ -163,6 +159,13 @@ function Calendar({ users, commutes, onToggleCommute, location }) {
         <button className="nav-btn" onClick={goToPrevMonth}>◀</button>
         <h3 className="calendar-month">{year}년 {month + 1}월</h3>
         <button className="nav-btn" onClick={goToNextMonth}>▶</button>
+      </div>
+
+      {/* 색상 범례 */}
+      <div className="calendar-legend">
+        <span className="legend-item"><span className="legend-dot dot-to" />출근</span>
+        <span className="legend-item"><span className="legend-dot dot-from" />퇴근</span>
+        <span className="legend-item"><span className="legend-dot dot-full" />출퇴근</span>
       </div>
 
       {/* 요일 헤더 */}
