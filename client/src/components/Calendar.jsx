@@ -12,6 +12,7 @@ function Calendar({ users, commutes, onToggleCommute, location }) {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState(null);
   const [selectedUserId, setSelectedUserId] = useState(null);
+  const [filterUserId, setFilterUserId] = useState(null); // 캘린더 필터
 
   const year = currentDate.getFullYear();
   const month = currentDate.getMonth();
@@ -37,9 +38,13 @@ function Calendar({ users, commutes, onToggleCommute, location }) {
     return user ? user.name : '?';
   };
 
-  // 특정 날짜의 모든 출퇴근 기록 (전체 사용자)
+  // 특정 날짜의 출퇴근 기록 (필터 적용)
   const getDateCommutes = (dateStr) => {
-    return commutes.filter((c) => c.date === dateStr);
+    let filtered = commutes.filter((c) => c.date === dateStr);
+    if (filterUserId) {
+      filtered = filtered.filter((c) => c.userId === filterUserId);
+    }
+    return filtered;
   };
 
   // 특정 날짜 + 특정 사용자의 출퇴근 상태
@@ -102,8 +107,11 @@ function Calendar({ users, commutes, onToggleCommute, location }) {
     );
   };
 
-  // 날짜 셀에 기록이 있는지 확인
+  // 날짜 셀에 기록이 있는지 확인 (필터 적용)
   const hasAnyCommute = (dateStr) => {
+    if (filterUserId) {
+      return commutes.some((c) => c.date === dateStr && c.userId === filterUserId);
+    }
     return commutes.some((c) => c.date === dateStr);
   };
 
@@ -160,6 +168,27 @@ function Calendar({ users, commutes, onToggleCommute, location }) {
         <h3 className="calendar-month">{year}년 {month + 1}월</h3>
         <button className="nav-btn" onClick={goToNextMonth}>▶</button>
       </div>
+
+      {/* 사용자 필터 */}
+      {users.length > 0 && (
+        <div className="calendar-filter">
+          <button
+            className={`filter-btn ${!filterUserId ? 'active' : ''}`}
+            onClick={() => setFilterUserId(null)}
+          >
+            전체
+          </button>
+          {users.map((u) => (
+            <button
+              key={u.id}
+              className={`filter-btn ${filterUserId === u.id ? 'active' : ''}`}
+              onClick={() => setFilterUserId(filterUserId === u.id ? null : u.id)}
+            >
+              {u.name}
+            </button>
+          ))}
+        </div>
+      )}
 
       {/* 색상 범례 */}
       <div className="calendar-legend">
