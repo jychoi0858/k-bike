@@ -219,6 +219,11 @@
   margin-top: 2px;
 }
 
+.popup-card-wide {
+  grid-column: 1 / -1;
+  background: linear-gradient(135deg, #f0f4ff, #ffecd2);
+}
+
 .popup-footer {
   margin-top: 14px;
   text-align: center;

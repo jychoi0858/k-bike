@@ -20,10 +20,17 @@ function BikeProgressBar({ users, commutes, onSelectUser, currentUserId, onEditU
     // 날짜 기준 중복 제거 → 하루에 출근/퇴근/둘다 해도 1일로 카운트
     const uniqueDays = new Set(userCommutes.map((c) => c.date));
     const totalDays = uniqueDays.size;
-    const savedAmount = totalDays * user.costPerTrip;
+    const totalTrips = userCommutes.length; // 출근/퇴근 각각 1건 = 왕복 금액 계산용
+    const savedAmount = totalTrips * user.costPerTrip;
     const progress = user.bikeCost > 0 ? Math.min((savedAmount / user.bikeCost) * 100, 100) : 0;
     const remaining = Math.max(user.bikeCost - savedAmount, 0);
-    return { totalDays, savedAmount, progress, remaining };
+
+    // 남은 일수 계산: 하루 평균 절약액 기준
+    // 왕복(출+퇴) = 1일, 편도 = 0.5일
+    const dailyRate = user.costPerTrip * 2; // 하루 왕복 절약액
+    const remainingDays = dailyRate > 0 ? Math.ceil(remaining / dailyRate) : 0;
+
+    return { totalDays, savedAmount, progress, remaining, remainingDays };
   };
 
   // 프로그레스바 클릭 → 상세 팝업 + 해당 사용자 선택
@@ -120,6 +127,15 @@ function BikeProgressBar({ users, commutes, onSelectUser, currentUserId, onEditU
                     <div className="popup-card-icon">💰</div>
                     <div className="popup-card-value">{formatMoney(stats.savedAmount)}원</div>
                     <div className="popup-card-label">절약한 금액</div>
+                  </div>
+                  <div className="popup-card popup-card-wide">
+                    <div className="popup-card-icon">📅</div>
+                    <div className="popup-card-value">
+                      {stats.progress >= 100 ? '🎉 본전 달성!' : `${stats.remainingDays}일`}
+                    </div>
+                    <div className="popup-card-label">
+                      {stats.progress >= 100 ? '' : '본전까지 남은 일수 (왕복 기준)'}
+                    </div>
                   </div>
                 </div>
               );
