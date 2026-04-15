@@ -14,14 +14,16 @@ function BikeProgressBar({ users, commutes, onSelectUser, currentUserId, onEditU
     return Math.floor(amount).toLocaleString('ko-KR');
   };
 
-  // 특정 사용자의 절약 정보 계산
+  // 특정 사용자의 절약 정보 계산 (하루 1회 카운트)
   const getUserStats = (user) => {
     const userCommutes = commutes.filter((c) => c.userId === user.id);
-    const totalTrips = userCommutes.length;
-    const savedAmount = totalTrips * user.costPerTrip;
+    // 날짜 기준 중복 제거 → 하루에 출근/퇴근/둘다 해도 1일로 카운트
+    const uniqueDays = new Set(userCommutes.map((c) => c.date));
+    const totalDays = uniqueDays.size;
+    const savedAmount = totalDays * user.costPerTrip;
     const progress = user.bikeCost > 0 ? Math.min((savedAmount / user.bikeCost) * 100, 100) : 0;
     const remaining = Math.max(user.bikeCost - savedAmount, 0);
-    return { totalTrips, savedAmount, progress, remaining };
+    return { totalDays, savedAmount, progress, remaining };
   };
 
   // 프로그레스바 클릭 → 상세 팝업 + 해당 사용자 선택
@@ -49,7 +51,7 @@ function BikeProgressBar({ users, commutes, onSelectUser, currentUserId, onEditU
       {/* 등록된 사용자별 프로그레스바 */}
       <div className="user-bars">
         {users.map((user) => {
-          const { totalTrips, savedAmount, progress } = getUserStats(user);
+          const { totalDays, savedAmount, progress } = getUserStats(user);
           const isComplete = progress >= 100;
           const isSelected = currentUserId === user.id;
 
@@ -74,6 +76,7 @@ function BikeProgressBar({ users, commutes, onSelectUser, currentUserId, onEditU
                   className="user-bike-icon"
                   style={{ left: `${progress}%` }}
                 >
+                  <span className="bike-percent">{progress.toFixed(1)}%</span>
                   <span className={progress > 0 ? 'riding' : ''}>🚲</span>
                 </div>
               </div>
@@ -105,7 +108,7 @@ function BikeProgressBar({ users, commutes, onSelectUser, currentUserId, onEditU
                   </div>
                   <div className="popup-card">
                     <div className="popup-card-icon">🚌</div>
-                    <div className="popup-card-value">{stats.totalTrips}회</div>
+                    <div className="popup-card-value">{stats.totalDays}일</div>
                     <div className="popup-card-label">총 출퇴근</div>
                   </div>
                   <div className="popup-card">
