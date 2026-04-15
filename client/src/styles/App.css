@@ -1,0 +1,246 @@
+/* ── 전체 앱 레이아웃 ── */
+.app {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 20px;
+  min-height: 100vh;
+  position: relative;
+}
+
+/* ── 헤더 ── */
+.app-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  padding: 8px 0;
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.logo {
+  font-size: 1.8rem;
+}
+
+.app-title {
+  font-size: 1.5rem;
+  font-weight: 800;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin: 0;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* ── 사용자 등록 버튼 ── */
+.register-btn {
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  padding: 8px 14px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+  white-space: nowrap;
+}
+
+.register-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+}
+
+/* ── 메인 ── */
+.app-main {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+/* ── 푸터 ── */
+.app-footer {
+  text-align: center;
+  margin-top: 32px;
+  padding: 16px;
+  color: #a0aec0;
+  font-size: 0.8rem;
+}
+
+.app-footer p {
+  margin: 0;
+}
+
+/* ── 설정 버튼 ── */
+.settings-btn {
+  background: #f7fafc;
+  border: 2px solid #e2e8f0;
+  border-radius: 12px;
+  width: 40px;
+  height: 40px;
+  font-size: 1.1rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+.settings-btn:hover {
+  border-color: #667eea;
+  background: #f0f4ff;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+}
+
+/* ── 설정 팝업 ── */
+.settings-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.35);
+  backdrop-filter: blur(2px);
+  z-index: 900;
+}
+
+.settings-popup {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: white;
+  border-radius: 20px;
+  padding: 28px;
+  min-width: 300px;
+  max-width: 380px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+  z-index: 1000;
+  animation: settingsPopupIn 0.25s ease-out;
+}
+
+@keyframes settingsPopupIn {
+  from { opacity: 0; transform: translate(-50%, -50%) scale(0.95); }
+  to { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+}
+
+.settings-popup-close {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: #f7fafc;
+  border: none;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  font-size: 0.9rem;
+  color: #718096;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s;
+}
+
+.settings-popup-close:hover {
+  background: #edf2f7;
+}
+
+.settings-title {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #2d3748;
+  margin: 0 0 20px;
+}
+
+.settings-section {
+  margin-bottom: 8px;
+}
+
+.settings-label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #718096;
+  margin-bottom: 10px;
+}
+
+.settings-city-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+}
+
+.settings-city-btn {
+  padding: 8px 10px;
+  border: 2px solid #e2e8f0;
+  border-radius: 10px;
+  background: white;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #4a5568;
+  cursor: pointer;
+  text-align: center;
+  transition: all 0.15s;
+}
+
+.settings-city-btn:hover {
+  border-color: #667eea;
+  background: #f7f8ff;
+}
+
+.settings-city-btn.active {
+  border-color: #667eea;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: white;
+}
+
+.settings-current {
+  margin: 12px 0 0;
+  font-size: 0.8rem;
+  color: #718096;
+  text-align: center;
+}
+
+/* ── 반응형 ── */
+@media (max-width: 600px) {
+  .register-btn {
+    padding: 6px 10px;
+    font-size: 0.85rem;
+  }
+
+  .app-title {
+    font-size: 1.2rem;
+  }
+
+  .settings-btn {
+    width: 36px;
+    height: 36px;
+    font-size: 1rem;
+  }
+
+  .settings-popup {
+    min-width: 260px;
+    padding: 20px;
+  }
+
+  .settings-city-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 4px;
+  }
+
+  .settings-city-btn {
+    padding: 6px 8px;
+    font-size: 0.8rem;
+  }
+}

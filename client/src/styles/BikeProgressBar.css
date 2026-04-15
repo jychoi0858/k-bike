@@ -1,0 +1,266 @@
+/* ── 프로그레스바 섹션 ── */
+.progress-section {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 24px;
+  padding: 28px;
+  margin-bottom: 32px;
+  color: white;
+  box-shadow: 0 20px 60px rgba(102, 126, 234, 0.3);
+  position: relative;
+}
+
+.progress-header {
+  margin-bottom: 20px;
+}
+
+.progress-title {
+  font-size: 1.4rem;
+  font-weight: 700;
+  margin: 0;
+}
+
+/* ── 사용자 없을 때 ── */
+.no-users-message {
+  text-align: center;
+  padding: 20px 0;
+  font-size: 0.95rem;
+  opacity: 0.8;
+}
+
+/* ── 사용자별 프로그레스바 리스트 ── */
+.user-bars {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.user-bar-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  border-radius: 14px;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.15s;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.user-bar-row:hover {
+  background: rgba(255, 255, 255, 0.18);
+  transform: translateY(-1px);
+}
+
+.user-bar-row.selected {
+  background: rgba(255, 255, 255, 0.2);
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.3);
+}
+
+/* 이름 */
+.user-bar-name {
+  font-size: 0.9rem;
+  font-weight: 700;
+  min-width: 60px;
+  white-space: nowrap;
+}
+
+/* 프로그레스바 트랙 */
+.user-bar-track {
+  flex: 1;
+  height: 24px;
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 12px;
+  position: relative;
+  overflow: visible;
+}
+
+.user-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #ffd700, #ff6b6b, #ff9a56);
+  border-radius: 12px;
+  transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* 자전거 아이콘 */
+.user-bike-icon {
+  position: absolute;
+  top: -18px;
+  transform: translateX(-50%);
+  transition: left 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+  font-size: 1.2rem;
+  filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.3));
+}
+
+.user-bike-icon .riding {
+  display: inline-block;
+  animation: pedaling 0.5s ease-in-out infinite;
+}
+
+@keyframes pedaling {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  25% { transform: translateY(-2px) rotate(-2deg); }
+  75% { transform: translateY(-2px) rotate(2deg); }
+}
+
+/* 금액 요약 */
+.user-bar-amount {
+  font-size: 0.75rem;
+  opacity: 0.7;
+  min-width: 100px;
+  text-align: right;
+  white-space: nowrap;
+}
+
+/* ── 상세 정보 팝업 ── */
+.popup-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 900;
+}
+
+.stats-popup {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: -12px;
+  translate: 0 100%;
+  background: white;
+  border-radius: 20px;
+  padding: 24px;
+  min-width: 300px;
+  max-width: 380px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+  z-index: 1000;
+  animation: popupAppear 0.25s ease-out;
+  color: #2d3748;
+}
+
+@keyframes popupAppear {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
+.popup-close {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: #f7fafc;
+  border: none;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  font-size: 0.9rem;
+  color: #718096;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s;
+}
+
+.popup-close:hover {
+  background: #edf2f7;
+}
+
+.popup-name {
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin-bottom: 16px;
+  color: #667eea;
+}
+
+.popup-cards {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+}
+
+.popup-card {
+  background: #f7fafc;
+  border-radius: 12px;
+  padding: 12px;
+  text-align: center;
+}
+
+.popup-card-icon {
+  font-size: 1.2rem;
+  margin-bottom: 2px;
+}
+
+.popup-card-value {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #2d3748;
+}
+
+.popup-card-label {
+  font-size: 0.7rem;
+  color: #a0aec0;
+  margin-top: 2px;
+}
+
+.popup-footer {
+  margin-top: 14px;
+  text-align: center;
+  font-size: 0.75rem;
+  color: #a0aec0;
+}
+
+.popup-edit-btn {
+  display: block;
+  width: 100%;
+  margin-top: 14px;
+  padding: 10px;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.popup-edit-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+}
+
+/* ── 반응형 ── */
+@media (max-width: 600px) {
+  .progress-section {
+    padding: 20px;
+  }
+
+  .progress-title {
+    font-size: 1.2rem;
+  }
+
+  .user-bar-row {
+    gap: 8px;
+    padding: 8px 10px;
+  }
+
+  .user-bar-name {
+    font-size: 0.8rem;
+    min-width: 48px;
+  }
+
+  .user-bar-amount {
+    font-size: 0.65rem;
+    min-width: 80px;
+  }
+
+  .stats-popup {
+    min-width: 260px;
+    padding: 18px;
+  }
+}
