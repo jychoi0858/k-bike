@@ -29,12 +29,15 @@ function BikeProgressBar({ users, commutes, onSelectUser, currentUserId, onEditU
     const progress = user.bikeCost > 0 ? Math.min((savedAmount / user.bikeCost) * 100, 100) : 0;
     const remaining = Math.max(user.bikeCost - savedAmount, 0);
 
+    // 평균 편도 단가
+    const avgTripCost = userCommutes.length > 0 ? Math.round(savedAmount / userCommutes.length) : 0;
+
     // 남은 일수: 최근 평균 일일 절약액 기준
     const avgPerTrip = userCommutes.length > 0 ? savedAmount / userCommutes.length : (user.costPerTrip || 0);
     const dailyRate = avgPerTrip * 2; // 왕복 기준
     const remainingDays = dailyRate > 0 ? Math.ceil(remaining / dailyRate) : 0;
 
-    return { totalDays, savedAmount, progress, remaining, remainingDays };
+    return { totalDays, savedAmount, progress, remaining, remainingDays, avgTripCost };
   };
 
   // 프로그레스바 클릭 → 상세 팝업 + 해당 사용자 선택
@@ -144,12 +147,20 @@ function BikeProgressBar({ users, commutes, onSelectUser, currentUserId, onEditU
                 </div>
               );
             })()}
-            <div className="popup-footer">
-              편도 {popupUser.distance}km ·{' '}
-              {popupUser.transportType === 'public'
-                ? `대중교통 편도 ${(popupUser.costPerTrip || 0).toLocaleString()}원`
-                : `${popupUser.transportType === 'gasoline' ? '휘발유' : '경유'} · 연비 ${popupUser.fuelEfficiency}km/L`}
-            </div>
+            {(() => {
+              const s = getUserStats(popupUser);
+              return (
+                <div className="popup-footer">
+                  편도 {popupUser.distance}km ·{' '}
+                  {popupUser.transportType === 'public'
+                    ? `대중교통 편도 ${(popupUser.costPerTrip || 0).toLocaleString()}원`
+                    : `${popupUser.transportType === 'gasoline' ? '휘발유' : '경유'} · 연비 ${popupUser.fuelEfficiency}km/L`}
+                  {popupUser.transportType !== 'public' && s.avgTripCost > 0 && (
+                    <><br />⛽ 누적 평균 편도 단가: {formatMoney(s.avgTripCost)}원</>
+                  )}
+                </div>
+              );
+            })()}
             <button
               className="popup-edit-btn"
               onClick={() => { onEditUser(popupUser); closePopup(); }}
