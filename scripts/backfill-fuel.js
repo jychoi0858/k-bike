@@ -12,9 +12,9 @@ const db = getFirestore();
 async function main() {
   // 최신 유가 가져오기 (4월용)
   const latestDoc = await db.collection('fuelPrices').doc('latest').get();
-  const latest = latestDoc.exists ? latestDoc.data() : { gasoline: 1800, diesel: 1600 };
+  const latest = latestDoc.exists ? latestDoc.data() : { gasoline: 1800, diesel: 1700 };
   console.log(`4월 기준 유가 - 휘발유: ${latest.gasoline}원/L, 경유: ${latest.diesel}원/L`);
-  console.log(`3월 기준 유가 - 휘발유: 1800원/L, 경유: 1600원/L`);
+  console.log(`3월 기준 유가 - 휘발유: 1800원/L, 경유: 1700원/L`);
 
   const startDate = new Date(2026, 2, 1); // 3월 1일
   const endDate = new Date(); // 오늘
@@ -28,7 +28,7 @@ async function main() {
     // 3월이면 1800원, 4월이면 최신 유가
     const isMarch = d.getMonth() === 2;
     const gasoline = isMarch ? 1800 : latest.gasoline;
-    const diesel = isMarch ? 1600 : latest.diesel;
+    const diesel = isMarch ? 1700 : latest.diesel;
 
     batch.set(db.collection('fuelPrices').doc(dateStr), {
       date: dateStr,
@@ -72,7 +72,7 @@ async function main() {
       const isMarch = commDate.getMonth() === 2;
       fuelPrice = user.transportType === 'gasoline'
         ? (isMarch ? 1800 : latest.gasoline)
-        : (isMarch ? 1600 : latest.diesel);
+        : (isMarch ? 1700 : latest.diesel);
       tripCost = Math.round((user.distance / user.fuelEfficiency) * fuelPrice);
     }
 
