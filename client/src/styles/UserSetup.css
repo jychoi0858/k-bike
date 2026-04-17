@@ -137,6 +137,42 @@
   color: #cbd5e0;
 }
 
+/* ── 교통수단 선택 ── */
+.transport-selector {
+  display: flex;
+  gap: 6px;
+}
+
+.transport-btn {
+  flex: 1;
+  padding: 10px 8px;
+  border: 2px solid #e2e8f0;
+  border-radius: 10px;
+  background: white;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #4a5568;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.transport-btn:hover {
+  border-color: #667eea;
+  background: #f7f8ff;
+}
+
+.transport-btn.active {
+  border-color: #667eea;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: white;
+}
+
+.form-hint {
+  font-size: 0.75rem;
+  color: #a0aec0;
+  margin: 2px 0 0;
+}
+
 /* ── 등록 버튼 ── */
 .setup-btn {
   margin-top: 8px;

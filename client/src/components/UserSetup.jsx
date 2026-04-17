@@ -3,25 +3,26 @@ import '../styles/UserSetup.css';
 
 /**
  * 사용자 등록/수정 모달 컴포넌트
- * - 모달 형태로 표시 (랜딩페이지 위에 오버레이)
- * - onClose로 모달 닫기 가능
+ * - 교통수단: 대중교통 / 휘발유 / 경유
+ * - 대중교통 → 편도비용 직접 입력
+ * - 휘발유/경유 → 연비 입력 (유가는 자동 수집)
  */
 function UserSetup({ onSubmit, onClose, existingUser }) {
   const [name, setName] = useState(existingUser?.name || '');
   const [distance, setDistance] = useState(existingUser?.distance || '');
+  const [transportType, setTransportType] = useState(existingUser?.transportType || 'public');
   const [costPerTrip, setCostPerTrip] = useState(
     existingUser?.costPerTrip ? existingUser.costPerTrip.toLocaleString('ko-KR') : ''
   );
+  const [fuelEfficiency, setFuelEfficiency] = useState(existingUser?.fuelEfficiency || '');
   const [bikeCost, setBikeCost] = useState(
     existingUser?.bikeCost ? existingUser.bikeCost.toLocaleString('ko-KR') : ''
   );
 
   const isEditing = !!existingUser;
 
-  // 숫자만 추출 (콤마 제거)
   const parseNumber = (str) => Number(str.replace(/,/g, ''));
 
-  // 입력 시 콤마 자동 포맷
   const handleMoneyChange = (value, setter) => {
     const numericOnly = value.replace(/[^0-9]/g, '');
     if (numericOnly === '') {
@@ -34,20 +35,39 @@ function UserSetup({ onSubmit, onClose, existingUser }) {
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    if (!name.trim() || !distance || !costPerTrip || !bikeCost) {
+    if (!name.trim() || !distance || !bikeCost) {
       alert('모든 항목을 입력해주세요!');
       return;
     }
 
-    onSubmit({
+    if (transportType === 'public' && !costPerTrip) {
+      alert('편도 비용을 입력해주세요!');
+      return;
+    }
+
+    if ((transportType === 'gasoline' || transportType === 'diesel') && !fuelEfficiency) {
+      alert('연비를 입력해주세요!');
+      return;
+    }
+
+    const userData = {
       name: name.trim(),
       distance: Number(distance),
-      costPerTrip: parseNumber(costPerTrip),
+      transportType,
       bikeCost: parseNumber(bikeCost),
-    });
+    };
+
+    if (transportType === 'public') {
+      userData.costPerTrip = parseNumber(costPerTrip);
+      userData.fuelEfficiency = null;
+    } else {
+      userData.fuelEfficiency = Number(fuelEfficiency);
+      userData.costPerTrip = 0; // 유가 기반으로 동적 계산
+    }
+
+    onSubmit(userData);
   };
 
-  // 오버레이 클릭 시 모달 닫기 (카드 바깥 영역)
   const handleOverlayClick = (e) => {
     if (e.target === e.currentTarget) {
       onClose();
@@ -57,7 +77,6 @@ function UserSetup({ onSubmit, onClose, existingUser }) {
   return (
     <div className="setup-overlay" onClick={handleOverlayClick}>
       <div className="setup-card">
-        {/* 닫기 버튼 */}
         <button className="modal-close-btn" onClick={onClose}>✕</button>
 
         <div className="setup-header">
@@ -97,17 +116,67 @@ function UserSetup({ onSubmit, onClose, existingUser }) {
             />
           </div>
 
+          {/* 교통수단 선택 */}
           <div className="form-group">
-            <label className="form-label">🚌 대중교통 편도 비용 (원)</label>
-            <input
-              type="text"
-              inputMode="numeric"
-              className="form-input"
-              placeholder="1,500"
-              value={costPerTrip}
-              onChange={(e) => handleMoneyChange(e.target.value, setCostPerTrip)}
-            />
+            <label className="form-label">🚗 기존 교통수단</label>
+            <div className="transport-selector">
+              <button
+                type="button"
+                className={`transport-btn ${transportType === 'public' ? 'active' : ''}`}
+                onClick={() => setTransportType('public')}
+              >
+                🚌 대중교통
+              </button>
+              <button
+                type="button"
+                className={`transport-btn ${transportType === 'gasoline' ? 'active' : ''}`}
+                onClick={() => setTransportType('gasoline')}
+              >
+                ⛽ 휘발유
+              </button>
+              <button
+                type="button"
+                className={`transport-btn ${transportType === 'diesel' ? 'active' : ''}`}
+                onClick={() => setTransportType('diesel')}
+              >
+                ⛽ 경유
+              </button>
+            </div>
           </div>
+
+          {/* 대중교통: 편도비용 입력 */}
+          {transportType === 'public' && (
+            <div className="form-group">
+              <label className="form-label">🚌 대중교통 편도 비용 (원)</label>
+              <input
+                type="text"
+                inputMode="numeric"
+                className="form-input"
+                placeholder="1,500"
+                value={costPerTrip}
+                onChange={(e) => handleMoneyChange(e.target.value, setCostPerTrip)}
+              />
+            </div>
+          )}
+
+          {/* 휘발유/경유: 연비 입력 */}
+          {(transportType === 'gasoline' || transportType === 'diesel') && (
+            <div className="form-group">
+              <label className="form-label">⛽ 차량 연비 (km/L)</label>
+              <input
+                type="number"
+                className="form-input"
+                placeholder="12"
+                min="1"
+                step="0.1"
+                value={fuelEfficiency}
+                onChange={(e) => setFuelEfficiency(e.target.value)}
+              />
+              <p className="form-hint">
+                유가는 매일 자동으로 업데이트됩니다 (오피넷 전국 평균)
+              </p>
+            </div>
+          )}
 
           <div className="form-group">
             <label className="form-label">💰 자전거 구매 비용 (원)</label>

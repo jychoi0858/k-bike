@@ -14,20 +14,24 @@ function BikeProgressBar({ users, commutes, onSelectUser, currentUserId, onEditU
     return Math.floor(amount).toLocaleString('ko-KR');
   };
 
-  // 특정 사용자의 절약 정보 계산 (하루 1회 카운트)
+  // 특정 사용자의 절약 정보 계산
   const getUserStats = (user) => {
     const userCommutes = commutes.filter((c) => c.userId === user.id);
     // 날짜 기준 중복 제거 → 하루에 출근/퇴근/둘다 해도 1일로 카운트
     const uniqueDays = new Set(userCommutes.map((c) => c.date));
     const totalDays = uniqueDays.size;
-    const totalTrips = userCommutes.length; // 출근/퇴근 각각 1건 = 왕복 금액 계산용
-    const savedAmount = totalTrips * user.costPerTrip;
+
+    // 절약 금액: tripCost가 저장되어 있으면 합산, 없으면 costPerTrip 사용 (기존 데이터 호환)
+    const savedAmount = userCommutes.reduce((sum, c) => {
+      return sum + (c.tripCost != null ? c.tripCost : (user.costPerTrip || 0));
+    }, 0);
+
     const progress = user.bikeCost > 0 ? Math.min((savedAmount / user.bikeCost) * 100, 100) : 0;
     const remaining = Math.max(user.bikeCost - savedAmount, 0);
 
-    // 남은 일수 계산: 하루 평균 절약액 기준
-    // 왕복(출+퇴) = 1일, 편도 = 0.5일
-    const dailyRate = user.costPerTrip * 2; // 하루 왕복 절약액
+    // 남은 일수: 최근 평균 일일 절약액 기준
+    const avgPerTrip = userCommutes.length > 0 ? savedAmount / userCommutes.length : (user.costPerTrip || 0);
+    const dailyRate = avgPerTrip * 2; // 왕복 기준
     const remainingDays = dailyRate > 0 ? Math.ceil(remaining / dailyRate) : 0;
 
     return { totalDays, savedAmount, progress, remaining, remainingDays };
@@ -141,7 +145,10 @@ function BikeProgressBar({ users, commutes, onSelectUser, currentUserId, onEditU
               );
             })()}
             <div className="popup-footer">
-              편도 {popupUser.distance}km · 편도 교통비 {popupUser.costPerTrip.toLocaleString()}원
+              편도 {popupUser.distance}km ·{' '}
+              {popupUser.transportType === 'public'
+                ? `대중교통 편도 ${(popupUser.costPerTrip || 0).toLocaleString()}원`
+                : `${popupUser.transportType === 'gasoline' ? '휘발유' : '경유'} · 연비 ${popupUser.fuelEfficiency}km/L`}
             </div>
             <button
               className="popup-edit-btn"

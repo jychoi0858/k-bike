@@ -10,6 +10,8 @@ import {
   subscribeCommutes,
   addCommute,
   deleteCommute,
+  getFuelPrice,
+  subscribeLatestFuelPrice,
 } from './services/firestore';
 import './styles/App.css';
 
@@ -25,6 +27,7 @@ function App() {
   const [showModal, setShowModal] = useState(false);
   const [editingUser, setEditingUser] = useState(null);
   const [showSettings, setShowSettings] = useState(false);
+  const [latestFuelPrice, setLatestFuelPrice] = useState(null);
 
   // 날씨 지역 설정 (개인 설정이라 localStorage 유지)
   const [location, setLocation] = useState(() => {
@@ -47,9 +50,14 @@ function App() {
       setCommutes(data);
     });
 
+    const unsubFuel = subscribeLatestFuelPrice((data) => {
+      setLatestFuelPrice(data);
+    });
+
     return () => {
       unsubUsers();
       unsubCommutes();
+      unsubFuel();
     };
   }, []);
 
@@ -90,6 +98,18 @@ function App() {
     localStorage.setItem('bikeTracker_location', JSON.stringify(city));
   };
 
+  // ── 편도 비용 계산 (유가 기반 사용자) ──
+  const calcTripCost = async (user, date) => {
+    if (user.transportType === 'public') {
+      return user.costPerTrip;
+    }
+    // 휘발유/경유: (편도거리 / 연비) × 유가
+    const fuelData = await getFuelPrice(date);
+    if (!fuelData) return 0;
+    const pricePerLiter = user.transportType === 'gasoline' ? fuelData.gasoline : fuelData.diesel;
+    return Math.round((user.distance / user.fuelEfficiency) * pricePerLiter);
+  };
+
   // ── 출퇴근 토글 ──
   const handleToggleCommute = async (date, type, userId) => {
     const existing = commutes.find(
@@ -99,7 +119,9 @@ function App() {
     if (existing) {
       await deleteCommute(existing.id);
     } else {
-      await addCommute({ userId, date, type });
+      const user = users.find((u) => u.id === userId);
+      const tripCost = user ? await calcTripCost(user, date) : 0;
+      await addCommute({ userId, date, type, tripCost });
     }
   };
 

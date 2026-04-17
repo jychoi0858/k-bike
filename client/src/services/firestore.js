@@ -1,6 +1,7 @@
 import {
   collection,
   doc,
+  getDoc,
   getDocs,
   addDoc,
   updateDoc,
@@ -70,4 +71,32 @@ export async function addCommute(commuteData) {
 /** 출퇴근 기록 삭제 */
 export async function deleteCommute(commuteId) {
   await deleteDoc(doc(db, 'commutes', commuteId));
+}
+
+// ──────────────────────────────
+//  유가 정보 (fuelPrices) 컬렉션
+// ──────────────────────────────
+
+/** 특정 날짜 유가 조회 (없으면 latest 반환) */
+export async function getFuelPrice(dateStr) {
+  // 먼저 해당 날짜 유가 확인
+  const dateDoc = await getDoc(doc(db, 'fuelPrices', dateStr));
+  if (dateDoc.exists()) {
+    return dateDoc.data();
+  }
+  // 없으면 최신 유가 반환
+  const latestDoc = await getDoc(doc(db, 'fuelPrices', 'latest'));
+  if (latestDoc.exists()) {
+    return latestDoc.data();
+  }
+  return null;
+}
+
+/** 최신 유가 실시간 구독 */
+export function subscribeLatestFuelPrice(callback) {
+  return onSnapshot(doc(db, 'fuelPrices', 'latest'), (snapshot) => {
+    if (snapshot.exists()) {
+      callback(snapshot.data());
+    }
+  });
 }
