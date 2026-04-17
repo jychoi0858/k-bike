@@ -38,12 +38,6 @@ async function main() {
   commutesSnap.forEach((doc) => {
     const data = doc.data();
 
-    // 이미 tripCost가 있으면 스킵
-    if (data.tripCost != null && data.tripCost > 0) {
-      skipped++;
-      return;
-    }
-
     const user = users[data.userId];
     if (!user) {
       console.log(`사용자 ${data.userId} 찾을 수 없음 - 스킵`);
@@ -52,18 +46,19 @@ async function main() {
     }
 
     let tripCost = 0;
+    let fuelPrice = null;
 
     if (!user.transportType || user.transportType === 'public') {
-      // 대중교통: costPerTrip 사용
       tripCost = user.costPerTrip || 0;
     } else if (fuelData && user.fuelEfficiency > 0) {
-      // 휘발유/경유: (편도거리 / 연비) × 유가
-      const pricePerLiter = user.transportType === 'gasoline' ? fuelData.gasoline : fuelData.diesel;
-      tripCost = Math.round((user.distance / user.fuelEfficiency) * pricePerLiter);
+      fuelPrice = user.transportType === 'gasoline' ? fuelData.gasoline : fuelData.diesel;
+      tripCost = Math.round((user.distance / user.fuelEfficiency) * fuelPrice);
     }
 
     if (tripCost > 0) {
-      batch.update(doc.ref, { tripCost });
+      const updateData = { tripCost };
+      if (fuelPrice != null) updateData.fuelPrice = fuelPrice;
+      batch.update(doc.ref, updateData);
       updated++;
     } else {
       skipped++;

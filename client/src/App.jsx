@@ -99,15 +99,16 @@ function App() {
   };
 
   // ── 편도 비용 계산 (유가 기반 사용자) ──
-  const calcTripCost = async (user, date) => {
+  const calcTripInfo = async (user, date) => {
     if (user.transportType === 'public') {
-      return user.costPerTrip;
+      return { tripCost: user.costPerTrip, fuelPrice: null };
     }
     // 휘발유/경유: (편도거리 / 연비) × 유가
     const fuelData = await getFuelPrice(date);
-    if (!fuelData) return 0;
-    const pricePerLiter = user.transportType === 'gasoline' ? fuelData.gasoline : fuelData.diesel;
-    return Math.round((user.distance / user.fuelEfficiency) * pricePerLiter);
+    if (!fuelData) return { tripCost: 0, fuelPrice: null };
+    const fuelPrice = user.transportType === 'gasoline' ? fuelData.gasoline : fuelData.diesel;
+    const tripCost = Math.round((user.distance / user.fuelEfficiency) * fuelPrice);
+    return { tripCost, fuelPrice };
   };
 
   // ── 출퇴근 토글 ──
@@ -120,8 +121,8 @@ function App() {
       await deleteCommute(existing.id);
     } else {
       const user = users.find((u) => u.id === userId);
-      const tripCost = user ? await calcTripCost(user, date) : 0;
-      await addCommute({ userId, date, type, tripCost });
+      const { tripCost, fuelPrice } = user ? await calcTripInfo(user, date) : { tripCost: 0, fuelPrice: null };
+      await addCommute({ userId, date, type, tripCost, fuelPrice });
     }
   };
 

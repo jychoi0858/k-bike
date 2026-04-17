@@ -32,12 +32,18 @@ function BikeProgressBar({ users, commutes, onSelectUser, currentUserId, onEditU
     // 평균 편도 단가
     const avgTripCost = userCommutes.length > 0 ? Math.round(savedAmount / userCommutes.length) : 0;
 
+    // 평균 유가 (원/L) - fuelPrice가 있는 기록만
+    const fuelRecords = userCommutes.filter((c) => c.fuelPrice != null && c.fuelPrice > 0);
+    const avgFuelPrice = fuelRecords.length > 0
+      ? Math.round(fuelRecords.reduce((sum, c) => sum + c.fuelPrice, 0) / fuelRecords.length)
+      : 0;
+
     // 남은 일수: 최근 평균 일일 절약액 기준
     const avgPerTrip = userCommutes.length > 0 ? savedAmount / userCommutes.length : (user.costPerTrip || 0);
     const dailyRate = avgPerTrip * 2; // 왕복 기준
     const remainingDays = dailyRate > 0 ? Math.ceil(remaining / dailyRate) : 0;
 
-    return { totalDays, savedAmount, progress, remaining, remainingDays, avgTripCost };
+    return { totalDays, savedAmount, progress, remaining, remainingDays, avgTripCost, avgFuelPrice };
   };
 
   // 프로그레스바 클릭 → 상세 팝업 + 해당 사용자 선택
@@ -155,8 +161,8 @@ function BikeProgressBar({ users, commutes, onSelectUser, currentUserId, onEditU
                   {popupUser.transportType === 'public'
                     ? `대중교통 편도 ${(popupUser.costPerTrip || 0).toLocaleString()}원`
                     : `${popupUser.transportType === 'gasoline' ? '휘발유' : '경유'} · 연비 ${popupUser.fuelEfficiency}km/L`}
-                  {popupUser.transportType !== 'public' && s.avgTripCost > 0 && (
-                    <><br />⛽ 누적 평균 편도 단가: {formatMoney(s.avgTripCost)}원</>
+                  {popupUser.transportType !== 'public' && s.avgFuelPrice > 0 && (
+                    <><br />⛽ 누적 평균 유가: {formatMoney(s.avgFuelPrice)}원/L</>
                   )}
                 </div>
               );
