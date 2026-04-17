@@ -59,17 +59,36 @@ async function main() {
   console.log(`[${dateStr}] 유가 데이터 수집 시작...`);
 
   try {
-    // 오피넷 전국 평균 유가 API (http)
-    const url = `http://www.opinet.co.kr/api/avgAllPrice.do?code=${apiKey}&out=json`;
-    const result = await fetchHTTP(url);
+    // 오피넷 전국 평균 유가 API 시도
+    const urls = [
+      `http://www.opinet.co.kr/api/avgAllPrice.do?code=${apiKey}&out=json`,
+      `https://www.opinet.co.kr/api/avgAllPrice.do?code=${apiKey}&out=json`,
+      `http://www.opinet.co.kr/api/avgSidoPrice.do?code=${apiKey}&sido=01&out=json`,
+    ];
 
-    if (!result.RESULT || !result.RESULT.OIL) {
-      console.error('API 응답 형식 오류:', JSON.stringify(result).substring(0, 300));
+    let oils = [];
+    for (const url of urls) {
+      console.log(`시도 중: ${url.replace(apiKey, '***')}`);
+      try {
+        const fetcher = url.startsWith('https') ? fetchJSON : fetchHTTP;
+        const result = await fetcher(url);
+        console.log('응답:', JSON.stringify(result).substring(0, 500));
+
+        if (result.RESULT && result.RESULT.OIL && result.RESULT.OIL.length > 0) {
+          oils = result.RESULT.OIL;
+          break;
+        }
+      } catch (e) {
+        console.log(`실패: ${e.message}`);
+      }
+    }
+
+    if (oils.length === 0) {
+      console.error('모든 API 엔드포인트에서 데이터를 가져오지 못했습니다.');
       process.exit(1);
     }
 
-    const oils = result.RESULT.OIL;
-    console.log('API 응답 데이터:', JSON.stringify(oils, null, 2));
+    console.log('유가 데이터:', JSON.stringify(oils, null, 2));
 
     // PRODCD 코드로 찾기, 없으면 PRODNM(제품명)으로 찾기
     const gasoline = oils.find((o) => o.PRODCD === 'B027' || o.PRODNM === '휘발유');
