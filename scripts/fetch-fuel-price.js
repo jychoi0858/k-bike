@@ -69,12 +69,15 @@ async function main() {
     }
 
     const oils = result.RESULT.OIL;
-    // PRODCD: B027=휘발유, D047=경유, C004=등유, B034=고급휘발유
-    const gasoline = oils.find((o) => o.PRODCD === 'B027');
-    const diesel = oils.find((o) => o.PRODCD === 'D047');
+    console.log('API 응답 데이터:', JSON.stringify(oils, null, 2));
+
+    // PRODCD 코드로 찾기, 없으면 PRODNM(제품명)으로 찾기
+    const gasoline = oils.find((o) => o.PRODCD === 'B027' || o.PRODNM === '휘발유');
+    const diesel = oils.find((o) => o.PRODCD === 'D047' || o.PRODNM === '경유');
 
     if (!gasoline || !diesel) {
       console.error('휘발유/경유 데이터를 찾을 수 없습니다.');
+      console.error('사용 가능한 제품:', oils.map((o) => `${o.PRODCD}(${o.PRODNM})`).join(', '));
       process.exit(1);
     }
 
