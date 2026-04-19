@@ -53,8 +53,9 @@ async function main() {
     process.exit(1);
   }
 
-  const today = new Date();
-  const dateStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+  const now = new Date();
+  const kst = new Date(now.getTime() + (9 * 60 * 60 * 1000));
+  const dateStr = `${kst.getUTCFullYear()}-${String(kst.getUTCMonth() + 1).padStart(2, '0')}-${String(kst.getUTCDate()).padStart(2, '0')}`;
 
   console.log(`[${dateStr}] 유가 데이터 수집 시작...`);
 
