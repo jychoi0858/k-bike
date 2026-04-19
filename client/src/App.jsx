@@ -134,6 +134,19 @@ function App() {
           <span className="logo">🚲</span>
           <h1 className="app-title">자출본전</h1>
         </div>
+
+        {/* 오늘의 유가 */}
+        {latestFuelPrice && (
+          <div className="header-fuel">
+            <div className="fuel-prices">
+              <span className="fuel-item">⛽ 휘발유 <strong>{latestFuelPrice.gasoline?.toLocaleString()}</strong></span>
+              <span className="fuel-divider">|</span>
+              <span className="fuel-item">경유 <strong>{latestFuelPrice.diesel?.toLocaleString()}</strong></span>
+            </div>
+            <div className="fuel-date">{latestFuelPrice.date} 기준 (원/L)</div>
+          </div>
+        )}
+
         <div className="header-right">
           <button className="register-btn" onClick={handleOpenRegister}>
             ➕ 등록
